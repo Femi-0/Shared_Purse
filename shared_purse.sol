@@ -107,7 +107,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
     */
 
     function delete_bill (bytes32 bill_id) public {
-        require(bills[bill_id].merchant == msg.sender,"Only Bill beneficiary may call this function");
+        require(bills[bill_id].beneficiary == msg.sender,"Only Bill beneficiary may call this function");
         bills[bill_id]._isDeleted = true;
         emit billDeleted(msg.sender,bill_id);
     }
