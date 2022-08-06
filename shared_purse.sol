@@ -15,7 +15,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
     using SafeMath for uint;
 
     struct Bill {
-        address payable beneficiary; // bill beneficiary
+        address beneficiary; // bill beneficiary
         address merchant; // bill administrator
         address [] contributor_addresses; //accounts contributing to payment
         uint8 [] contributor_share; //list of bill split expressed as a percentage value
@@ -26,7 +26,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
     }
 
 
-    mapping (bytes32 => Bill) bills; //establishes relationships for bills and their structs
+    mapping (bytes32 => Bill) public bills; //establishes relationships for bills and their structs
     
     mapping (address => bytes32 []) merchant_bills; //holds all bills created by merchant
 
@@ -72,7 +72,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
     /**
     *@dev merchant creates a new bill assigned to an array of contributors 
     */
-    function create_new_bill (address payable beneficiary_,
+    function create_new_bill (address beneficiary_,
                               address [] calldata contributor_addresses_, 
                               uint8 [] calldata contributor_share_,
                               string memory terms_,
@@ -82,7 +82,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
                                   require(contributor_addresses_.length == contributor_share_.length && contributor_share_.length == contributor_status_.length,"Contributor fields are not the same lenght");
                                   require(_getArraySum(contributor_share_)==100,"Total of shares should be 100");
                                   require(beneficiary_ != msg.sender,"Usa a different account to collect funds as precaution");
-                                  bytes32 bill_id = keccak256(abi.encodePacked(msg.sender,msg.data,terms_));
+                                  bytes32 bill_id = keccak256(abi.encodePacked(msg.sender,msg.data,terms_,block.timestamp));
                                   bills[bill_id].beneficiary = beneficiary_;
                                   bills[bill_id].merchant = msg.sender;
                                   bills[bill_id].contributor_addresses = contributor_addresses_;
@@ -91,9 +91,10 @@ contract SharedPurse is ERC20PresetMinterPauser{
                                   bills[bill_id].obligation = obligation_;
                                   bills[bill_id].contributor_status = contributor_status_;
                                   merchant_bills[msg.sender].push(bill_id);
-                                  for (uint256 i = 0; i < contributor_addresses_.length; i++) {
-                                       uint256 share_amount = obligation_.mul(bills[bill_id].contributor_share[i]).div(100);
-                                       burnRate[contributor_addresses_[i]].add(share_amount);
+                                  for (uint i = 0; i < contributor_addresses_.length; i++) {
+                                       uint share_amount = obligation_.mul(bills[bill_id].contributor_share[i]).div(100);
+                                       address contributor = contributor_addresses_[i];
+                                       burnRate[contributor] = burnRate[contributor].add(share_amount);
                                        _add_bill_subscription(contributor_addresses_[i],bill_id,i);
                                        }
                                   emit newBill(msg.sender,bill_id);
@@ -114,17 +115,20 @@ contract SharedPurse is ERC20PresetMinterPauser{
     /**
     *@dev contributor settles merchants bills
     **/
-    function settle_bill(bytes32 bill_id) public {
+    function settle_bill(bytes32 bill_id) public  {
         uint index = subscribed_bill_index[msg.sender][bill_id];
+        if(index == 0){
+            require(bills[bill_id].contributor_addresses[index] == msg.sender,"Account does not have obligation to settle this bill");
+        }
         uint8 status = bills[bill_id].contributor_status[index];
         require( status==1 ,"Bill is already settled");
         uint total_bill = bills[bill_id].obligation;
         uint bill_share = bills[bill_id].contributor_share[index];
         uint owing = total_bill.mul(bill_share).div(100);
-        address payable pay_to = bills[bill_id].beneficiary;
-        pay_to.transfer(owing); // ASK STEVE et al. Should this be at the end? Placed here to ensure the next two steps do not occur if this step fails
+        address pay_to = (bills[bill_id].beneficiary);
+        transfer(pay_to,owing);
         bills[bill_id].contributor_status[index] = 2;
-        burnRate[msg.sender].sub(owing);
+        burnRate[msg.sender] = burnRate[msg.sender].sub(owing);
     }
 
 
@@ -132,17 +136,18 @@ contract SharedPurse is ERC20PresetMinterPauser{
     *@dev merchant collects on bills
     */
     function collect_bill (bytes32 bill_id) public {
-        require(bills[bill_id].merchant == msg.sender,"Only Bill beneficiary may call this function");
+        require(bills[bill_id].beneficiary == msg.sender,"Only Bill beneficiary may call this function");
         require(bills[bill_id]._isDeleted == false, "Bill Deleted");
         for (uint i; i < bills[bill_id].contributor_share.length; i++) {
         if (bills[bill_id].contributor_status[i] == 1) {
             revert("Not all contributors have settled this bill");
         }
         }
-        address payable pay_to = payable(getRoleMember(MINTER_ROLE,0));
+        address pay_to = getRoleMember(MINTER_ROLE,0);
         uint pay_out = bills[bill_id].obligation;
         delete_bill(bill_id);
-        pay_to.transfer(pay_out);
+        transfer(pay_to,pay_out);
         }
+
 }
 
