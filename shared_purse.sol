@@ -67,6 +67,18 @@ contract SharedPurse is ERC20PresetMinterPauser{
     return sum;
     }
 
+    /**
+    *@dev Reduce burnRate
+    **/
+    function _reduceBurnRate(bytes32 bill_id, 
+                             address contributor) 
+                             private {
+                                uint index = subscribed_bill_index[contributor][bill_id];
+                                uint total_bill = bills[bill_id].obligation;
+                                uint bill_share = bills[bill_id].contributor_share[index];
+                                uint owing = total_bill.mul(bill_share).div(100);
+                                burnRate[contributor] = burnRate[contributor].sub(owing);
+                             }
     
     
     /**
@@ -105,10 +117,14 @@ contract SharedPurse is ERC20PresetMinterPauser{
     *@dev merchant deletes an existing bill
     *add require to make callable only by contract of bill creator
     */
-
     function delete_bill (bytes32 bill_id) public {
         require(bills[bill_id].beneficiary == msg.sender,"Only Bill beneficiary may call this function");
         bills[bill_id]._isDeleted = true;
+        for (uint i; i < bills[bill_id].contributor_addresses.length; i++){
+            if (bills[bill_id].contributor_status[i] == 1){
+                _reduceBurnRate(bill_id,bills[bill_id].contributor_addresses[i]);
+            }
+        }
         emit billDeleted(msg.sender,bill_id);
     }
 
@@ -128,7 +144,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
         address pay_to = (bills[bill_id].beneficiary);
         transfer(pay_to,owing);
         bills[bill_id].contributor_status[index] = 2;
-        burnRate[msg.sender] = burnRate[msg.sender].sub(owing);
+        _reduceBurnRate(bill_id,msg.sender);
     }
 
 
