@@ -28,9 +28,11 @@ contract SharedPurse is ERC20PresetMinterPauser{
 
     mapping (bytes32 => Bill) public bills; //establishes relationships for bills and their structs
     
-    mapping (address => bytes32 []) merchant_bills; //holds all bills created by merchant
+    mapping (address => bytes32 []) public merchant_bills; //holds all bills created by merchant
 
     mapping (address => bytes32[]) public subscribed_bills; //holds all contributors bills
+
+    mapping (address => mapping(bytes32=>string)) public contibutor_bill_status; //bill paid or not paid by contributor
 
     mapping (address => mapping(bytes32 => uint)) public subscribed_bill_index; //holds contibutors position in bill
 
@@ -51,6 +53,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
                                      ) private {
                                          subscribed_bills[contributor_addresse_].push(bill);
                                          subscribed_bill_index[contributor_addresse_][bill] = position;
+                                         contibutor_bill_status[contributor_addresse_][bill] = "Not Paid";
                                      } 
 
 
@@ -145,6 +148,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
         transfer(pay_to,owing);
         bills[bill_id].contributor_status[index] = 2;
         _reduceBurnRate(bill_id,msg.sender);
+        contibutor_bill_status[msg.sender][bill_id] = "Paid";
     }
 
 
