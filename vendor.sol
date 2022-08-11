@@ -56,7 +56,17 @@ contract Vendor is Ownable {
     (bool sent,) = msg.sender.call{value: address(this).balance}("");
     require(sent, "Failed to send user balance back to the owner");
   }
-
+  /**
+  * @notice the owner to withdraw money before change owner
+  */
+  function getMyBalance() public view returns (uint) {
+        return address(this).balance;
+    }   
+  function transferOwnership(address newOwner) public virtual override onlyOwner {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        require(address(this).balance == 0, "The Balance should be zero before transfer owner");
+        _transferOwnership(newOwner);
+    }
   /**
   * @notice Allow owner to set Token rate
   */
