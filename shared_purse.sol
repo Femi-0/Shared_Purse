@@ -60,7 +60,7 @@ contract SharedPurse is ERC20PresetMinterPauser{
     /**  
     *@dev function to return sum of elements of dynamic array
     **/
-    function _getArraySum (uint8 [] calldata arr) private pure returns(uint)
+    function _getArraySum (uint8 [] memory arr) private pure returns(uint)
     {
     uint i;
     uint sum = 0;
@@ -89,10 +89,10 @@ contract SharedPurse is ERC20PresetMinterPauser{
     */
     function create_new_bill (address beneficiary_,
                               address [] calldata contributor_addresses_, 
-                              uint8 [] calldata contributor_share_,
+                              uint8 [] memory contributor_share_,
                               string memory terms_,
                               uint obligation_, // this value should be 10**18 of the lowest fiat unit
-                              uint8 [] calldata contributor_status_ 
+                              uint8 [] memory contributor_status_ 
                               ) public {
                                   require(contributor_addresses_.length == contributor_share_.length && contributor_share_.length == contributor_status_.length,"Contributor fields are not the same lenght");
                                   require(_getArraySum(contributor_share_)==100,"Total of shares should be 100");
@@ -168,6 +168,21 @@ contract SharedPurse is ERC20PresetMinterPauser{
         delete_bill(bill_id);
         transfer(pay_to,pay_out);
         }
+
+    /**
+    *@dev determine status of bill for merchant
+    */
+    function is_bill_ready (bytes32 bill_id) public view returns (string memory){
+        uint8[] memory statuses = bills[bill_id].contributor_status;
+        uint summation = _getArraySum(statuses);
+        uint len = statuses.length;
+        if(summation == len){
+            return "Bill Not Settled";
+        } else if (summation == (2*len)){
+            return "Bill Settled";
+        }
+        return "Bill Partially Settled";
+    }
 
 }
 
