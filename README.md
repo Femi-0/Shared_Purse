@@ -8,7 +8,7 @@
 
 The links above present a minimum delectable product that represents what is described in the Proposed Solution section below.
 
-The sections provided in the demo link above, interact with two smart contracts deployed to the Coston network, and are described here to facilitate user interaction:
+The sections provided in the demo link above (built on https://bubble.io , no code yippee! 🥳), interact with two smart contracts deployed to the Coston network, and are described here to facilitate user interaction:
 
 ### Merchant
 ---
