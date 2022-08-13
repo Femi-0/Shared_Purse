@@ -8,9 +8,10 @@
 
 The links above present a minimum delectable product that represents what is described in the Proposed Solution section below.
 
-The sections on are provided in this one page link, and are described here to facilitate user interaction:
+The sections provided in the demo link above, interact with two smart contracts deployed to the Coston network, and are described here to facilitate user interaction:
 
 ### Merchant
+---
 
 ![](https://github.com/Femi-0/Shared_Purse/blob/main/Resources/merchant.png)
 
@@ -34,15 +35,17 @@ After some time, the merchant or any other party my inquire about the bill, rece
 
 - Bill Settled
 
-On receiving the "Bill Settled" response, the merchant may collect and delete the bill. 
+On receiving the "Bill Settled" response, the beneficiary may collect and delete the bill. 
 
 ### Vendor
+---
 
 ![](https://github.com/Femi-0/Shared_Purse/blob/main/Resources/vendor.png)
 
 A section that allows accounts to buy Shared Purse Tokens.
 
 ### Contributor
+---
 
 ![](https://github.com/Femi-0/Shared_Purse/blob/main/Resources/contributor.png)
 
@@ -57,13 +60,13 @@ Whenever a group of persons that possess prior knowledge and trust of each other
 
 For example: Ade, Blair and Chan share an apartment, for which Ade has signed a lease, whenever the rent is to be paid out, Ade pays the rent and is recompensed by Blair and Chan, simple enough. However, Ade also shares a phone bill with Chan which comes due about 15 days before the rent is collected, Chan pays this bill and is reimbursed by Ade.
 
-We can begin to see how all of these payments can become tedious with one party settling the other. An unfortunate scenario also exists where one or more persons may refuse or be unable to reimburse what had been paid out on their behalf  
+We can begin to see how all of these payments can become tedious with one party settling the other. An unfortunate scenario also exists where one or more persons may refuse or be unable to reimburse what had been paid out on their behalf.  
 
 ## Proposed Solution
 
 A smart contract is proposed as a solution to the above stated issue.
 It will be deployed by us (think bill collections), and would allow a merchant(utility, landlord, etc) to create a shared bill for participants to freely enter into. These participants will hold a reserve of our tokens to settle their debt, whenever a debt is settled, the commensurate amount of tokens are transferred to the merchant’s account and on payout of fiat to the merchant, those tokens are burnt off the smart contract.
 
-From the example above, Ade, Blair and Chan would have their landlord assign them to a shared account on the smart contract to which their bill will be drawn, whenever rent is due, the tokens will be drawn from their account to the landlord expected account, and when the landlord is paid out in fiat, the corresponding amount of tokens are burnt. In a similar manner Chan and Ade would also have their telephone provider assign them an account on the smart contract at which to settle their bills.
+From the example above, Ade, Blair and Chan would have their landlord assign them to a shared bill whenever rent is due, the tokens will be drawn from their account to the landlord's account whever they settle the bill, and when the landlord is paid out in fiat, the corresponding amount of tokens are burnt. In a similar manner Chan and Ade would also have their telephone provider assign them a shared bill.
 
 
